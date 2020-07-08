@@ -97,8 +97,8 @@ export default class Client {
      * @param userID The users Telegram ID
      * @param reason The reason the user is being banned
      */
-    async addBan(userID: number, reason?: string): Promise<void> {
-        await this.makeRequest('POST', 'bans', {
+    addBan(userID: number, reason?: string): Promise<Ban> {
+        return this.makeRequest('POST', 'bans', {
             userID,
             reason,
         });
