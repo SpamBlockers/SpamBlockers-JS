@@ -16,8 +16,8 @@ export default class Client {
     apiKey: string;
 
     /**
-     * @param apiKey Your SpamBlockers API key
-     * @param host The host of the SpamBlockers API
+     * @param {String} apiKey Your SpamBlockers API key
+     * @param {String} [host='https://spamblockers.lungers.com'] The host of the SpamBlockers API
      */
     constructor(apiKey: string, host = 'https://spamblockers.lungers.com') {
         this.apiKey = apiKey;
@@ -75,7 +75,8 @@ export default class Client {
 
     /**
      * Get a ban by ID
-     * @param userID The users Telegram ID
+     * @param {Number} userID The users Telegram ID
+     * @returns {Promise<Ban>} The ban object
      */
     getBan(userID: number): Promise<Ban> {
         return this.makeRequest('GET', `bans/${userID}`);
@@ -83,6 +84,7 @@ export default class Client {
 
     /**
      * Get a list of all bans
+     * @returns {Promise<number[] | null>} The list of banned IDs
      */
     async getBans(): Promise<number[] | null> {
         const url = new URL('bans', this._host).toString();
@@ -107,8 +109,9 @@ export default class Client {
 
     /**
      * Add or update a ban
-     * @param userID The users Telegram ID
-     * @param reason The reason the user is being banned
+     * @param {Number} userID The users Telegram ID
+     * @param {String} [reason] The reason the user is being banned
+     * @returns {Promise<Ban>} The new ban object
      */
     addBan(userID: number, reason?: string): Promise<Ban> {
         return this.makeRequest('POST', 'bans', {
@@ -119,7 +122,8 @@ export default class Client {
 
     /**
      * Get a list of all users
-     * @param userID The users Telegram ID
+     * @param {Number} userID The users Telegram ID
+     * @returns {Promise<User>} The user object
      */
     getUser(userID: number): Promise<User> {
         return this.makeRequest('GET', `users/${userID}`);
@@ -127,7 +131,8 @@ export default class Client {
 
     /**
      * Get a list of all users
-     * @param permission Filter users by admin or user
+     * @param {'admin' | 'user'} [permission] Filter users by admin or user
+     * @returns {Promise<User[]>} The list of users
      */
     getUsers(permission?: 'admin' | 'user'): Promise<User[]> {
         return this.makeRequest('GET', 'users', permission ? { permission } : {});
@@ -135,8 +140,9 @@ export default class Client {
 
     /**
      * Create a new user
-     * @param userID The users Telegram ID
-     * @param permission The permission level of the user
+     * @param {Number} userID The users Telegram ID
+     * @param {'admin' | 'user'} [permission='user'] The permission level of the user
+     * @returns {Promise<User>} The new user object
      */
     createUser(userID: number, permission: 'admin' | 'user' = 'user'): Promise<User> {
         return this.makeRequest('POST', 'users', {
