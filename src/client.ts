@@ -6,6 +6,10 @@ interface RequestData {
     [key: string]: string | number | undefined;
 }
 
+interface RequestSearchParams {
+    [key: string]: string;
+}
+
 export default class Client {
     private _host: URL;
 
@@ -36,7 +40,11 @@ export default class Client {
         throw new Error(response.message);
     }
 
-    private async makeRequest<T>(method: 'GET', path: string): Promise<SuccessResponse<T>['result']>;
+    private async makeRequest<T>(
+        method: 'GET',
+        path: string,
+        queryParams?: RequestSearchParams,
+    ): Promise<SuccessResponse<T>['result']>;
     private async makeRequest<T>(
         method: 'POST',
         path: string,
@@ -45,15 +53,20 @@ export default class Client {
     private async makeRequest<T>(
         method: 'GET' | 'POST',
         path: string,
-        data?: RequestData,
+        data?: RequestData | RequestSearchParams,
     ): Promise<SuccessResponse<T>['result']> {
-        const url = new URL(path, this._host).toString();
-        const response = await fetch(url, {
+        const url = new URL(path, this._host);
+        if (method === 'GET' && data) {
+            const entries = Object.entries(data as RequestSearchParams);
+            url.search = new URLSearchParams(entries).toString();
+        }
+
+        const response = await fetch(url.toString(), {
             method,
             headers: {
                 Authorization: `Bearer ${this.apiKey}`,
             },
-            body: data ? JSON.stringify(data) : null,
+            body: method === 'POST' && data ? JSON.stringify(data) : null,
         });
 
         const json = await response.json();
@@ -114,9 +127,10 @@ export default class Client {
 
     /**
      * Get a list of all users
+     * @param permission Filter users by admin or user
      */
-    getUsers(): Promise<User[]> {
-        return this.makeRequest('GET', 'users');
+    getUsers(permission?: 'admin' | 'user'): Promise<User[]> {
+        return this.makeRequest('GET', 'users', permission ? { permission } : {});
     }
 
     /**
